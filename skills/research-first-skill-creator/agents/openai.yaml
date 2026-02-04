@@ -1,0 +1,4 @@
+interface:
+  display_name: "Research-First Skill Creator"
+  short_description: "Research-first creator for coding skills"
+  default_prompt: "Use $research-first-skill-creator to design a coding-workflow skill with research notes and reusable resources."
