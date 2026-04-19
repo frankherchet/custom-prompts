@@ -77,6 +77,7 @@ Use these delegated scopes as the default starting point:
 - `/me` or profile basics: `User.Read`
 - `/me/messages` or inbox queries: `Mail.ReadBasic`
 - `/me/messages` when message body or richer properties are required: `Mail.Read`
+- `/me/messages?$search="..."`: `Mail.ReadBasic` or `Mail.Read`
 - `/me/sendMail`: `Mail.Send`
 - `/me/calendar/calendarView` or upcoming events: `Calendars.ReadBasic`
 - `/me/events` when fuller calendar data is required: `Calendars.Read`
@@ -96,6 +97,12 @@ Use these delegated scopes as the default starting point:
 - `/sites/{siteId}/drives`: `Files.Read` or `Sites.Read.All`
 - `/sites/{site-id}/drive/root/search(q='...')`: `Files.Read` or `Sites.Read.All`
 - `/sites/{site-id}/lists/{list-id}/items`: `Sites.Read.All`
+- `/sites/{site-id}/pages` or `/sites/{site-id}/pages/microsoft.graph.sitePage`:
+  `Sites.Read.All`
+- `/sites/{site-id}/pages/{page-id}` or
+  `/sites/{site-id}/pages/{page-id}/microsoft.graph.sitePage/webparts`:
+  `Sites.Read.All`
+- `/sites/{site-id}/sites`: `Sites.Read.All`
 - `/search/query` for SharePoint content search:
   Microsoft Learn lists `Sites.Read.All` and `Files.Read.All` among supported
   delegated permissions for this API; use the narrowest permission that fits
@@ -113,6 +120,10 @@ Use these patterns before improvising:
   `request --path /me`
 - Mail: list unread inbox items:
   `request --path '/me/mailFolders/Inbox/messages?$filter=isRead%20eq%20false&$top=10&$select=subject,from,receivedDateTime,isRead,webLink'`
+- Mail: list messages from one sender:
+  `request --path "/me/messages?\$filter=from/emailAddress/address%20eq%20'user@example.com'&\$top=20&\$select=subject,from,receivedDateTime,webLink"`
+- Mail: search messages with full-text or KQL:
+  `request --path '/me/messages?$search=\"hello world\"&$select=subject,from,receivedDateTime,bodyPreview,webLink'`
 - Mail: send a message:
   `request --method POST --path /me/sendMail --body-file /absolute/path/to/send-mail.json`
 - Mail: create a draft message:
@@ -125,6 +136,10 @@ Use these patterns before improvising:
   `request --method POST --path '/me/messages/{message-id}/attachments' --body-file /absolute/path/to/add-attachment.json`
 - Calendar: read upcoming events in a time window:
   `request --path '/me/calendar/calendarView?startDateTime=2026-04-19T00:00:00Z&endDateTime=2026-04-26T00:00:00Z&$top=10&$select=subject,start,end,location,webLink' --header 'Prefer=outlook.timezone=\"Europe/Berlin\"'`
+- Calendar: list tomorrow's meetings:
+  `request --path '/me/calendar/calendarView?startDateTime=2026-04-20T00:00:00Z&endDateTime=2026-04-21T00:00:00Z&$top=20&$select=subject,start,end,organizer,location,webLink' --header 'Prefer=outlook.timezone=\"Europe/Berlin\"'`
+- Calendar: list event masters with selected fields:
+  `request --path '/me/events?$select=subject,body,bodyPreview,organizer,attendees,start,end,location,webLink&$top=20' --header 'Prefer=outlook.body-content-type=\"text\"'`
 - Calendar: create an event:
   `request --method POST --path /me/events --body-file /absolute/path/to/create-event.json`
 - Teams: list joined teams:
@@ -163,6 +178,16 @@ Use these patterns before improvising:
   `request --path "/sites/{site-id}/lists/{list-id}/items?expand=fields(select=Title,Modified,Editor)&$top=20"`
 - SharePoint: get one SharePoint list item with fields:
   `request --path "/sites/{site-id}/lists/{list-id}/items/{item-id}?expand=fields"`
+- SharePoint pages: list site pages:
+  `request --path '/sites/{site-id}/pages/microsoft.graph.sitePage?$top=20&$select=id,name,title,webUrl,lastModifiedDateTime'`
+- SharePoint pages: get one page:
+  `request --path '/sites/{site-id}/pages/{page-id}/microsoft.graph.sitePage?$select=id,name,title,description,webUrl,lastModifiedDateTime'`
+- SharePoint pages: get page content layout:
+  `request --path '/sites/{site-id}/pages/{page-id}/microsoft.graph.sitePage?$expand=canvasLayout'`
+- SharePoint pages: list webparts:
+  `request --path '/sites/{site-id}/pages/{page-id}/microsoft.graph.sitePage/webparts'`
+- SharePoint: list subsites under a site:
+  `request --path '/sites/{site-id}/sites?$select=id,displayName,webUrl'`
 - SharePoint: cross-search sites, files, or list items with Microsoft Search:
   `request --method POST --path /search/query --body-file /absolute/path/to/sharepoint-search.json`
 - Follow paging:
@@ -226,6 +251,14 @@ python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py req
   --method POST \
   --path '/me/messages/{message-id}/attachments' \
   --body-file /absolute/path/to/add-attachment.json
+```
+
+Mail search example:
+
+```bash
+python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py request \
+  --method GET \
+  --path '/me/messages?$search=\"hello world\"&$select=subject,from,receivedDateTime,bodyPreview,webLink'
 ```
 
 Calendar view example:
@@ -301,8 +334,24 @@ Default to `v1.0` for production-safe behavior.
 - Prefer `$select` to reduce payload size and token exposure risk in returned
   content.
 - Prefer `$top` on list endpoints to keep responses small and manageable.
+- When using `/me/messages?$search=...`, prefer returning compact fields such as
+  `subject`, `from`, `receivedDateTime`, `bodyPreview`, and `webLink`.
+- Microsoft documents KQL-style message search terms like `from:alice`,
+  `subject:budget`, and plain quoted full-text search. Prefer `$search` over
+  improvised client-side filtering when the user asks for keyword search.
+- For `/me/messages` filters, prefer server-side predicates on
+  `receivedDateTime` and `from/emailAddress/address` when the question is about
+  time windows or a sender.
 - For calendar time-window queries, prefer `/calendarView` over `/events` when
   you need expanded occurrences within a concrete date range.
+- For "meetings tomorrow" or other bounded schedule questions, use
+  `/me/calendar/calendarView` with exact `startDateTime` and `endDateTime`
+  values for the user-facing day in the intended timezone.
+- `Prefer: outlook.timezone="Europe/Berlin"` affects the response timezone, but
+  Microsoft documents that the timezone offset in `startDateTime` and
+  `endDateTime` controls how those query bounds are interpreted.
+- `Prefer: outlook.body-content-type="text"` is useful when you need plain-text
+  event or message bodies instead of HTML-heavy payloads.
 - For SharePoint under delegated auth, prefer `/sites/root` or
   `/sites/{hostname}:/{relative-path}` over `/sites`, because listing all sites
   is not generally available for delegated auth.
@@ -333,6 +382,9 @@ Default to `v1.0` for production-safe behavior.
 - For SharePoint, document-library, or OneDrive/drive search tasks, read
   `references/sharepoint-search.md` before inventing search payloads or
   traversal flows from scratch.
+- For SharePoint page discovery or page-content extraction tasks, read
+  `references/sharepoint-pages.md` before inventing page or webpart endpoints
+  from scratch.
 - Do not confuse Teams direct or group chats with team channels. Use `/chats`
   for direct/group chat workflows and `/teams/.../channels/...` for channel
   workflows.
@@ -349,6 +401,9 @@ Default to `v1.0` for production-safe behavior.
 - `@odata.nextLink`: do not reconstruct it manually; pass it back exactly.
 - For mail failures on `/me/messages`, the token often has `User.Read` but not
   `Mail.ReadBasic` or `Mail.Read`.
+- For mail search failures on `/me/messages?$search=...`, the token often lacks
+  `Mail.ReadBasic` or `Mail.Read`, or the query needs to be expressed in valid
+  message-search syntax instead of arbitrary OData.
 - For Teams failures on `/me/joinedTeams`, the token often lacks
   `Team.ReadBasic.All`.
 - For Teams chat failures on `/me/chats` or `/chats/{chat-id}/messages`, the
@@ -364,6 +419,8 @@ Default to `v1.0` for production-safe behavior.
   the token often lacks `Files.Read` or `Sites.Read.All`.
 - For SharePoint list-item failures on `/sites/{site-id}/lists/{list-id}/items`,
   the token often lacks `Sites.Read.All`.
+- For SharePoint page or webpart failures on `/sites/{site-id}/pages...`, the
+  token often lacks `Sites.Read.All`.
 - For Microsoft Search failures on `/search/query`, the token often lacks a
   broader delegated scope such as `Sites.Read.All` or `Files.Read.All` for the
   requested SharePoint entity types.
@@ -377,6 +434,7 @@ Read these references when needed:
 - `references/api-docs.md`
 - `references/message-resource.md`
 - `references/security-and-auth.md`
+- `references/sharepoint-pages.md`
 - `references/sharepoint-search.md`
 - `references/teams-api.md`
 - `references/research-notes.md`

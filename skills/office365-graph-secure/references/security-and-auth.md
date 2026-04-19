@@ -52,6 +52,7 @@ Default endpoint-to-scope map:
 - `/me`: `User.Read`
 - `/me/messages`: `Mail.ReadBasic`
 - `/me/messages` for fuller content: `Mail.Read`
+- `/me/messages?$search="..."`: `Mail.ReadBasic` or `Mail.Read`
 - `/me/sendMail`: `Mail.Send`
 - `/me/calendar/calendarView`: `Calendars.ReadBasic`
 - `/me/events`: `Calendars.Read`
@@ -62,6 +63,11 @@ Default endpoint-to-scope map:
 - `/sites/{site-id}/drive/root/search(q='...')`: `Files.Read` or
   `Sites.Read.All`
 - `/sites/{site-id}/lists/{list-id}/items`: `Sites.Read.All`
+- `/sites/{site-id}/pages` and `/sites/{site-id}/pages/{page-id}`:
+  `Sites.Read.All`
+- `/sites/{site-id}/pages/{page-id}/microsoft.graph.sitePage/webparts`:
+  `Sites.Read.All`
+- `/sites/{site-id}/sites`: `Sites.Read.All`
 - `/search/query` for SharePoint entities: `Sites.Read.All` or `Files.Read.All`
 - `/me/drive`: `Files.Read`
 - `/me/memberOf`: `User.Read`
@@ -110,6 +116,18 @@ That reference covers:
 - Microsoft Search request bodies for `site`, `driveItem`, and `listItem`
 - safer result collection patterns for SharePoint content
 
+## SharePoint Page Notes
+
+For SharePoint page, webpart, or subsite tasks, also read:
+
+- `references/sharepoint-pages.md`
+
+That reference covers:
+
+- the difference between `baseSitePage` and `sitePage`
+- page metadata, layout, and webpart retrieval
+- subsite discovery flows
+
 ## Common Failure Patterns
 
 - `ErrorAccessDenied` on `/me/messages`:
@@ -121,6 +139,8 @@ That reference covers:
 - `ErrorAccessDenied` on `/sites/{site-id}/drive/root/search(...)`:
   the token is valid but missing `Files.Read` or `Sites.Read.All`
 - `ErrorAccessDenied` on `/sites/{site-id}/lists/{list-id}/items`:
+  the token is valid but missing `Sites.Read.All`
+- `ErrorAccessDenied` on `/sites/{site-id}/pages...`:
   the token is valid but missing `Sites.Read.All`
 - `ErrorAccessDenied` on `/search/query` for SharePoint entity types:
   the token is valid but missing `Sites.Read.All` or `Files.Read.All`
