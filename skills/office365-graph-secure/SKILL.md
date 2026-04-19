@@ -58,28 +58,45 @@ Optional:
 
 ## Domain Routing
 
-Read only the relevant reference. Do not bulk-load all references by default.
+Read only the relevant reference for the current task. Do not bulk-load all
+references by default.
 
-- Mail, inbox queries, sender filters, `$search`, draft workflows, and
-  attachments:
-  `references/mail.md`
-- Calendar windows, "meetings tomorrow", event listing, and timezone handling:
-  `references/calendar.md`
-- Teams teams/channels/chats/channel-message flows:
-  `references/teams.md`
-- SharePoint sites, drives, driveItems, listItems, and search:
-  `references/sharepoint-search.md`
-- SharePoint pages, page layout, webparts, and subsites:
-  `references/sharepoint-pages.md`
-- Shared auth, security, common delegated scopes, and failure patterns:
-  `references/security-and-auth.md`
-- Canonical Microsoft Graph API description URLs:
-  `references/api-docs.md`
-- General research notes and prior verification context:
-  `references/research-notes.md`
+Start with one domain reference:
 
-If a domain reference points to a deeper specialist file, read that deeper file
-only when the task actually needs it.
+- Mail:
+  Read `references/mail.md` for inbox queries, sender filters, message
+  `$search`, drafts, attachments, and send-mail.
+- Calendar:
+  Read `references/calendar.md` for time-window queries, tomorrow-style meeting
+  lookups, event listing, and timezone handling.
+- Teams:
+  Read `references/teams.md` for teams, channels, chats, and message-sending
+  workflows.
+- SharePoint search:
+  Read `references/sharepoint-search.md` for sites, drives, driveItems,
+  listItems, and `/search/query`.
+- SharePoint pages:
+  Read `references/sharepoint-pages.md` for pages, page layout,
+  `canvasLayout`, webparts, and subsites.
+
+Read shared references only when needed:
+
+- Shared auth and common failure patterns:
+  Read `references/security-and-auth.md` for scope mapping, auth constraints,
+  and common access-denied patterns.
+- Canonical API description URLs:
+  Read `references/api-docs.md` only when the task needs the official Microsoft
+  API description link.
+- General verification context:
+  Read `references/research-notes.md` only when earlier research context is
+  actually useful.
+
+Open additional references only if:
+
+- the first domain reference points to them, or
+- the task genuinely spans multiple domains
+
+Do not load all references just because they exist.
 
 ## Commands
 
