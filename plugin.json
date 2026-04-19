@@ -1,0 +1,7 @@
+{
+  "name": "office365",
+  "description": "Secure Office 365 and Microsoft Graph chat customizations for VS Code agent plugins.",
+  "version": "0.1.0",
+  "skills": "skills/",
+  "agents": "agents/"
+}

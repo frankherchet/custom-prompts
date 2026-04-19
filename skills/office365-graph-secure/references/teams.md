@@ -106,7 +106,7 @@ Send a chat message:
 Joined teams:
 
 ```bash
-python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py request \
+python3 skills/office365-graph-secure/scripts/graph_secure.py request \
   --method GET \
   --path /me/joinedTeams
 ```
@@ -114,7 +114,7 @@ python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py req
 List chats:
 
 ```bash
-python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py request \
+python3 skills/office365-graph-secure/scripts/graph_secure.py request \
   --method GET \
   --path '/me/chats?$top=10&$expand=lastMessagePreview'
 ```
@@ -122,7 +122,7 @@ python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py req
 Send a channel message:
 
 ```bash
-python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py request \
+python3 skills/office365-graph-secure/scripts/graph_secure.py request \
   --method POST \
   --path '/teams/{team-id}/channels/{channel-id}/messages' \
   --body-file /absolute/path/to/send-channel-message.json
@@ -131,7 +131,7 @@ python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py req
 Send a chat message:
 
 ```bash
-python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py request \
+python3 skills/office365-graph-secure/scripts/graph_secure.py request \
   --method POST \
   --path '/chats/{chat-id}/messages' \
   --body-file /absolute/path/to/send-chat-message.json

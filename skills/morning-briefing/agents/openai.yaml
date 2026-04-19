@@ -1,0 +1,4 @@
+interface:
+  display_name: "Morning Briefing"
+  short_description: "Manual Office 365 morning briefing slash workflow"
+  default_prompt: "Use $morning-briefing for a secure Office 365 morning briefing with today's agenda, important meetings, urgent unread email, and preparation notes."

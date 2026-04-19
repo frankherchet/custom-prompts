@@ -95,7 +95,7 @@ Add a small attachment to a draft:
 Unread inbox items:
 
 ```bash
-python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py request \
+python3 skills/office365-graph-secure/scripts/graph_secure.py request \
   --method GET \
   --path '/me/mailFolders/Inbox/messages?$filter=isRead%20eq%20false&$top=10&$select=subject,from,receivedDateTime,isRead,webLink'
 ```
@@ -103,7 +103,7 @@ python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py req
 Messages from one sender:
 
 ```bash
-python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py request \
+python3 skills/office365-graph-secure/scripts/graph_secure.py request \
   --method GET \
   --path "/me/messages?\$filter=from/emailAddress/address%20eq%20'user@example.com'&\$top=20&\$select=subject,from,receivedDateTime,webLink"
 ```
@@ -111,7 +111,7 @@ python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py req
 Message search:
 
 ```bash
-python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py request \
+python3 skills/office365-graph-secure/scripts/graph_secure.py request \
   --method GET \
   --path '/me/messages?$search=\"hello world\"&$select=subject,from,receivedDateTime,bodyPreview,webLink'
 ```
@@ -119,7 +119,7 @@ python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py req
 Send mail:
 
 ```bash
-python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py request \
+python3 skills/office365-graph-secure/scripts/graph_secure.py request \
   --method POST \
   --path /me/sendMail \
   --body-file /absolute/path/to/send-mail.json

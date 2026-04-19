@@ -103,13 +103,13 @@ Do not load all references just because they exist.
 Check configuration:
 
 ```bash
-python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py doctor
+python3 skills/office365-graph-secure/scripts/graph_secure.py doctor
 ```
 
 Basic request example:
 
 ```bash
-python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py request \
+python3 skills/office365-graph-secure/scripts/graph_secure.py request \
   --method GET \
   --path /me
 ```
@@ -117,7 +117,7 @@ python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py req
 Create or update the local token file safely:
 
 ```bash
-python3 custom-prompts/skills/office365-graph-secure/scripts/manage_token_file.py \
+python3 skills/office365-graph-secure/scripts/manage_token_file.py \
   --print-export
 ```
 

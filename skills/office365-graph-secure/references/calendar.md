@@ -56,7 +56,7 @@ Create an event:
 Calendar view:
 
 ```bash
-python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py request \
+python3 skills/office365-graph-secure/scripts/graph_secure.py request \
   --method GET \
   --header 'Prefer=outlook.timezone="Europe/Berlin"' \
   --path '/me/calendar/calendarView?startDateTime=2026-04-19T00:00:00Z&endDateTime=2026-04-26T00:00:00Z&$top=10&$select=subject,start,end,location,webLink'
@@ -65,7 +65,7 @@ python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py req
 Tomorrow's meetings:
 
 ```bash
-python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py request \
+python3 skills/office365-graph-secure/scripts/graph_secure.py request \
   --method GET \
   --header 'Prefer=outlook.timezone="Europe/Berlin"' \
   --path '/me/calendar/calendarView?startDateTime=2026-04-20T00:00:00Z&endDateTime=2026-04-21T00:00:00Z&$top=20&$select=subject,start,end,organizer,location,webLink'
@@ -74,7 +74,7 @@ python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py req
 Event masters:
 
 ```bash
-python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py request \
+python3 skills/office365-graph-secure/scripts/graph_secure.py request \
   --method GET \
   --header 'Prefer=outlook.body-content-type="text"' \
   --path '/me/events?$select=subject,body,bodyPreview,organizer,attendees,start,end,location,webLink&$top=20'
@@ -83,7 +83,7 @@ python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py req
 Create event:
 
 ```bash
-python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py request \
+python3 skills/office365-graph-secure/scripts/graph_secure.py request \
   --method POST \
   --path /me/events \
   --body-file /absolute/path/to/create-event.json
