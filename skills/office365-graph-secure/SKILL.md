@@ -54,6 +54,22 @@ Optional:
 6. If the API returns `@odata.nextLink`, follow it with another `request` call
    against that absolute next-link URL.
 
+## Skill Maintenance Rule
+
+If the skill appears wrong, incomplete, outdated, or missing a safe workflow,
+do not stop at the immediate runtime error. Tell the user what part of the
+skill should be improved and propose a concrete fix.
+
+When proposing a skill fix:
+
+- state what failed or was missing
+- explain whether the problem is in `SKILL.md`, a reference file, or a script
+- propose the smallest useful change that would prevent the problem next time
+- if you can already infer the correct improvement, offer to patch the skill
+  directly
+- keep the token-file-only security model intact unless the user explicitly
+  asks to redesign it
+
 ## Scope Cheat Sheet
 
 Use these delegated scopes as the default starting point:
@@ -210,6 +226,8 @@ Default to `v1.0` for production-safe behavior.
   `Team.ReadBasic.All`.
 - For SharePoint failures on `/sites/root` or site-path lookups, the token
   often lacks `Sites.Read.All`.
+- If a failure exposes a missing recipe, misleading instruction, or incomplete
+  guidance in this skill, propose a concrete skill improvement to the user.
 
 Read these references when needed:
 

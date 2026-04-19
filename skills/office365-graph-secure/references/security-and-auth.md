@@ -28,6 +28,13 @@ guidance, with extra constraints to keep secrets out of the model context.
 - `scripts/manage_token_file.py` writes the token file atomically and enforces
   a dedicated secret directory with owner-only permissions.
 
+## Maintenance Expectation
+
+If this skill fails because the documentation is wrong, a recipe is missing, or
+the script does not cover a needed safe path, the agent should tell the user
+what to improve in the skill and propose a concrete fix instead of only
+reporting the runtime error.
+
 ## Auth Mode Selection
 
 The only supported auth path is `access-token-file`.
