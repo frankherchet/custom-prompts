@@ -82,6 +82,10 @@ Use these delegated scopes as the default starting point:
 - `/me/events` when fuller calendar data is required: `Calendars.Read`
 - `/me/joinedTeams`: `Team.ReadBasic.All`
 - `/teams/{team-id}/primaryChannel` or channel lookups: `Channel.ReadBasic.All`
+- `/teams/{team-id}` team settings reads: `TeamSettings.Read.All`
+- `/teams` create team: `Team.Create`
+- `/teams/{team-id}/channels/{channel-id}/messages` send channel message:
+  Teams-specific delegated send permissions such as `ChannelMessage.Send`
 - `/sites/root` or `/sites/{hostname}:/{relative-path}`: `Sites.Read.All`
 - `/sites/{siteId}/drives`: `Files.Read` or `Sites.Read.All`
 - `/me/drive` or OneDrive reads: `Files.Read`
@@ -113,8 +117,14 @@ Use these patterns before improvising:
   `request --method POST --path /me/events --body-file /absolute/path/to/create-event.json`
 - Teams: list joined teams:
   `request --path /me/joinedTeams`
+- Teams: get team details:
+  `request --path '/teams/{team-id}?$select=id,displayName,description,webUrl'`
 - Teams: get the General channel for a team:
   `request --path '/teams/{team-id}/primaryChannel?$select=id,displayName,webUrl'`
+- Teams: create a channel:
+  `request --method POST --path '/teams/{team-id}/channels' --body-file /absolute/path/to/create-channel.json`
+- Teams: send a channel message:
+  `request --method POST --path '/teams/{team-id}/channels/{channel-id}/messages' --body-file /absolute/path/to/send-channel-message.json`
 - SharePoint: get the tenant root site:
   `request --path '/sites/root?$select=id,displayName,webUrl'`
 - SharePoint: get a site by path:
@@ -201,6 +211,15 @@ python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py req
   --path /me/joinedTeams
 ```
 
+Teams send-message example:
+
+```bash
+python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py request \
+  --method POST \
+  --path '/teams/{team-id}/channels/{channel-id}/messages' \
+  --body-file /absolute/path/to/send-channel-message.json
+```
+
 SharePoint example:
 
 ```bash
@@ -237,6 +256,8 @@ Default to `v1.0` for production-safe behavior.
   without putting the token on the command line.
 - For message composition, read `references/message-resource.md` before creating
   draft/send payloads from scratch.
+- For Teams resource-model and workflow questions, read `references/teams-api.md`
+  before inventing team/channel/chat payloads from scratch.
 
 ## Failure Handling
 
@@ -252,6 +273,8 @@ Default to `v1.0` for production-safe behavior.
   `Mail.ReadBasic` or `Mail.Read`.
 - For Teams failures on `/me/joinedTeams`, the token often lacks
   `Team.ReadBasic.All`.
+- For Teams write failures on channel-message or channel-creation endpoints, the
+  token often lacks Teams-specific delegated write permissions.
 - For SharePoint failures on `/sites/root` or site-path lookups, the token
   often lacks `Sites.Read.All`.
 - If a failure exposes a missing recipe, misleading instruction, or incomplete
@@ -262,4 +285,5 @@ Read these references when needed:
 - `references/api-docs.md`
 - `references/message-resource.md`
 - `references/security-and-auth.md`
+- `references/teams-api.md`
 - `references/research-notes.md`

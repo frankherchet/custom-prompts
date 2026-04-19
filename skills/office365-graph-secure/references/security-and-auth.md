@@ -77,6 +77,19 @@ That reference covers:
 - updating and sending drafts
 - adding small attachments to drafts
 
+## Teams API Notes
+
+For Teams resource-model and workflow tasks, also read:
+
+- `references/teams-api.md`
+
+That reference covers:
+
+- the relationship between `team`, `group`, `channel`, and `chatMessage`
+- common Teams management and messaging flows
+- asynchronous team creation behavior
+- Teams polling limitations from the official overview
+
 ## Common Failure Patterns
 
 - `ErrorAccessDenied` on `/me/messages`:
