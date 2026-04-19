@@ -281,5 +281,6 @@ same exact value.
 
 Read these references when needed:
 
+- `references/api-docs.md`
 - `references/security-and-auth.md`
 - `references/research-notes.md`
