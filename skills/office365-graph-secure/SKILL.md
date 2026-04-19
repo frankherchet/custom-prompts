@@ -99,6 +99,14 @@ Use these patterns before improvising:
   `request --path '/me/mailFolders/Inbox/messages?$filter=isRead%20eq%20false&$top=10&$select=subject,from,receivedDateTime,isRead,webLink'`
 - Mail: send a message:
   `request --method POST --path /me/sendMail --body-file /absolute/path/to/send-mail.json`
+- Mail: create a draft message:
+  `request --method POST --path /me/messages --body-file /absolute/path/to/create-draft.json`
+- Mail: update an existing draft:
+  `request --method PATCH --path '/me/messages/{message-id}' --body-file /absolute/path/to/update-draft.json`
+- Mail: send an existing draft:
+  `request --method POST --path '/me/messages/{message-id}/send'`
+- Mail: add a small attachment to a draft:
+  `request --method POST --path '/me/messages/{message-id}/attachments' --body-file /absolute/path/to/add-attachment.json`
 - Calendar: read upcoming events in a time window:
   `request --path '/me/calendar/calendarView?startDateTime=2026-04-19T00:00:00Z&endDateTime=2026-04-26T00:00:00Z&$top=10&$select=subject,start,end,location,webLink' --header 'Prefer=outlook.timezone=\"Europe/Berlin\"'`
 - Calendar: create an event:
@@ -133,6 +141,15 @@ python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py req
   --path '/me/messages?$top=10'
 ```
 
+Create draft message example:
+
+```bash
+python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py request \
+  --method POST \
+  --path /me/messages \
+  --body-file /absolute/path/to/create-draft.json
+```
+
 Create or update the local token file safely:
 
 ```bash
@@ -156,6 +173,15 @@ python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py req
   --method POST \
   --path /me/sendMail \
   --body-file /absolute/path/to/send-mail.json
+```
+
+Add small attachment to draft example:
+
+```bash
+python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py request \
+  --method POST \
+  --path '/me/messages/{message-id}/attachments' \
+  --body-file /absolute/path/to/add-attachment.json
 ```
 
 Calendar view example:
@@ -209,6 +235,8 @@ Default to `v1.0` for production-safe behavior.
   permissions such as `chmod 600`.
 - Use `scripts/manage_token_file.py` to create or rotate the token file safely
   without putting the token on the command line.
+- For message composition, read `references/message-resource.md` before creating
+  draft/send payloads from scratch.
 
 ## Failure Handling
 
@@ -232,5 +260,6 @@ Default to `v1.0` for production-safe behavior.
 Read these references when needed:
 
 - `references/api-docs.md`
+- `references/message-resource.md`
 - `references/security-and-auth.md`
 - `references/research-notes.md`

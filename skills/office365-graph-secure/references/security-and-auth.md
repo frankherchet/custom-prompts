@@ -64,6 +64,19 @@ Default endpoint-to-scope map:
 
 Prefer the narrowest scope that satisfies the task.
 
+## Message Composition Notes
+
+For Outlook mail composition tasks, also read:
+
+- `references/message-resource.md`
+
+That reference covers:
+
+- `message` payload structure
+- the difference between `sendMail` and draft creation
+- updating and sending drafts
+- adding small attachments to drafts
+
 ## Common Failure Patterns
 
 - `ErrorAccessDenied` on `/me/messages`:
