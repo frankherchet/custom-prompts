@@ -94,6 +94,12 @@ Use these delegated scopes as the default starting point:
   `ChannelMessage.Send`
 - `/sites/root` or `/sites/{hostname}:/{relative-path}`: `Sites.Read.All`
 - `/sites/{siteId}/drives`: `Files.Read` or `Sites.Read.All`
+- `/sites/{site-id}/drive/root/search(q='...')`: `Files.Read` or `Sites.Read.All`
+- `/sites/{site-id}/lists/{list-id}/items`: `Sites.Read.All`
+- `/search/query` for SharePoint content search:
+  Microsoft Learn lists `Sites.Read.All` and `Files.Read.All` among supported
+  delegated permissions for this API; use the narrowest permission that fits
+  the entity type you are searching
 - `/me/drive` or OneDrive reads: `Files.Read`
 - `/me/memberOf`: `User.Read`
 
@@ -149,6 +155,16 @@ Use these patterns before improvising:
   `request --path '/sites/{hostname}:/{server-relative-path}?$select=id,displayName,webUrl'`
 - SharePoint: list document libraries for a site:
   `request --path '/sites/{site-id}/drives?$top=10&$select=id,name,webUrl,driveType'`
+- SharePoint: search within a site's default document library:
+  `request --path "/sites/{site-id}/drive/root/search(q='quarterly budget')?$top=10&$select=id,name,webUrl,parentReference,lastModifiedDateTime"`
+- SharePoint: list folder children by path inside a site drive:
+  `request --path "/sites/{site-id}/drive/root:/Shared Documents/Folder:/children?$top=20&$select=id,name,webUrl,folder,file,lastModifiedDateTime"`
+- SharePoint: list SharePoint list items with selected fields:
+  `request --path "/sites/{site-id}/lists/{list-id}/items?expand=fields(select=Title,Modified,Editor)&$top=20"`
+- SharePoint: get one SharePoint list item with fields:
+  `request --path "/sites/{site-id}/lists/{list-id}/items/{item-id}?expand=fields"`
+- SharePoint: cross-search sites, files, or list items with Microsoft Search:
+  `request --method POST --path /search/query --body-file /absolute/path/to/sharepoint-search.json`
 - Follow paging:
   reuse the exact `@odata.nextLink` value as `--path 'https://graph.microsoft.com/...'`
 
@@ -254,6 +270,23 @@ python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py req
   --path '/sites/root?$select=id,displayName,webUrl'
 ```
 
+SharePoint search example:
+
+```bash
+python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py request \
+  --method GET \
+  --path "/sites/{site-id}/drive/root/search(q='quarterly budget')?\$top=10&\$select=id,name,webUrl,parentReference,lastModifiedDateTime"
+```
+
+Microsoft Search example:
+
+```bash
+python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py request \
+  --method POST \
+  --path /search/query \
+  --body-file /absolute/path/to/sharepoint-search.json
+```
+
 Use `--graph-version beta` only when the user explicitly needs preview APIs.
 Default to `v1.0` for production-safe behavior.
 
@@ -273,6 +306,19 @@ Default to `v1.0` for production-safe behavior.
 - For SharePoint under delegated auth, prefer `/sites/root` or
   `/sites/{hostname}:/{relative-path}` over `/sites`, because listing all sites
   is not generally available for delegated auth.
+- For SharePoint information gathering, prefer this sequence:
+  resolve the site, enumerate drives or lists, run the narrowest search that
+  fits the task, then fetch only the fields needed for the final summary.
+- Use `/sites/{site-id}/drive/root/search(q='...')` when the user already knows
+  the target site and you want document-library search scoped to that site.
+- Use `POST /search/query` when the user needs broader SharePoint discovery
+  across `site`, `driveItem`, or `listItem` entities.
+- After locating a file hit, prefer `webUrl`, `name`, `parentReference`,
+  timestamps, and selected metadata over downloading raw file content unless
+  the user explicitly asks for file bytes.
+- Do not surface `@microsoft.graph.downloadUrl` by default. The docs describe it
+  as a short-lived unauthenticated download URL, so treat it as sensitive output
+  and only expose it if the user explicitly asks for a direct download link.
 - Use `--header KEY=VALUE` for safe extra headers like `Prefer`, but never
   attempt to set `Authorization`.
 - Use `--body-file` or `--body-json` for JSON request bodies.
@@ -284,6 +330,9 @@ Default to `v1.0` for production-safe behavior.
   draft/send payloads from scratch.
 - For Teams resource-model and workflow questions, read `references/teams-api.md`
   before inventing team/channel/chat payloads from scratch.
+- For SharePoint, document-library, or OneDrive/drive search tasks, read
+  `references/sharepoint-search.md` before inventing search payloads or
+  traversal flows from scratch.
 - Do not confuse Teams direct or group chats with team channels. Use `/chats`
   for direct/group chat workflows and `/teams/.../channels/...` for channel
   workflows.
@@ -311,6 +360,13 @@ Default to `v1.0` for production-safe behavior.
 - For Teams send-message failures on `/chats/{chat-id}/messages`, check the
   current delegated send permission documented by Microsoft Learn when the
   token was minted.
+- For SharePoint drive-search failures on `/sites/{site-id}/drive/root/search`,
+  the token often lacks `Files.Read` or `Sites.Read.All`.
+- For SharePoint list-item failures on `/sites/{site-id}/lists/{list-id}/items`,
+  the token often lacks `Sites.Read.All`.
+- For Microsoft Search failures on `/search/query`, the token often lacks a
+  broader delegated scope such as `Sites.Read.All` or `Files.Read.All` for the
+  requested SharePoint entity types.
 - For SharePoint failures on `/sites/root` or site-path lookups, the token
   often lacks `Sites.Read.All`.
 - If a failure exposes a missing recipe, misleading instruction, or incomplete
@@ -321,5 +377,6 @@ Read these references when needed:
 - `references/api-docs.md`
 - `references/message-resource.md`
 - `references/security-and-auth.md`
+- `references/sharepoint-search.md`
 - `references/teams-api.md`
 - `references/research-notes.md`

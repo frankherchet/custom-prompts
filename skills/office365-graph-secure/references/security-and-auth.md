@@ -59,6 +59,10 @@ Default endpoint-to-scope map:
 - `/teams/{team-id}/primaryChannel`: `Channel.ReadBasic.All`
 - `/sites/root` or `/sites/{hostname}:/{relative-path}`: `Sites.Read.All`
 - `/sites/{siteId}/drives`: `Files.Read` or `Sites.Read.All`
+- `/sites/{site-id}/drive/root/search(q='...')`: `Files.Read` or
+  `Sites.Read.All`
+- `/sites/{site-id}/lists/{list-id}/items`: `Sites.Read.All`
+- `/search/query` for SharePoint entities: `Sites.Read.All` or `Files.Read.All`
 - `/me/drive`: `Files.Read`
 - `/me/memberOf`: `User.Read`
 
@@ -92,6 +96,20 @@ That reference covers:
 - Teams polling limitations from the official overview
 - the split between direct/group chats and team channels
 
+## SharePoint Search Notes
+
+For SharePoint, OneDrive for Business, document-library, or list-search tasks,
+also read:
+
+- `references/sharepoint-search.md`
+
+That reference covers:
+
+- the relationship between `site`, `drive`, `driveItem`, and `listItem`
+- search flows for one site versus broader SharePoint discovery
+- Microsoft Search request bodies for `site`, `driveItem`, and `listItem`
+- safer result collection patterns for SharePoint content
+
 ## Common Failure Patterns
 
 - `ErrorAccessDenied` on `/me/messages`:
@@ -100,6 +118,12 @@ That reference covers:
   the token is valid but missing `Team.ReadBasic.All`
 - `ErrorAccessDenied` on `/sites/root`:
   the token is valid but missing `Sites.Read.All`
+- `ErrorAccessDenied` on `/sites/{site-id}/drive/root/search(...)`:
+  the token is valid but missing `Files.Read` or `Sites.Read.All`
+- `ErrorAccessDenied` on `/sites/{site-id}/lists/{list-id}/items`:
+  the token is valid but missing `Sites.Read.All`
+- `ErrorAccessDenied` on `/search/query` for SharePoint entity types:
+  the token is valid but missing `Sites.Read.All` or `Files.Read.All`
 - `InvalidAuthenticationToken`:
   token is expired, malformed, or for the wrong audience
 - `429`:
