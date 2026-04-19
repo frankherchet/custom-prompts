@@ -74,33 +74,44 @@ Default endpoint-to-scope map:
 
 Prefer the narrowest scope that satisfies the task.
 
-## Message Composition Notes
+## Mail Notes
 
-For Outlook mail composition tasks, also read:
+For Outlook mail tasks, also read:
 
-- `references/message-resource.md`
+- `references/mail.md`
 
 That reference covers:
 
-- `message` payload structure
-- the difference between `sendMail` and draft creation
-- updating and sending drafts
-- adding small attachments to drafts
+- inbox queries
+- sender filters
+- message `$search` and KQL usage
+- send, draft, and small-attachment flows
 
-## Teams API Notes
+## Calendar Notes
+
+For Outlook calendar tasks, also read:
+
+- `references/calendar.md`
+
+That reference covers:
+
+- calendar window queries
+- tomorrow-style schedule lookups
+- event master listing
+- timezone handling
+
+## Teams Notes
 
 For Teams resource-model and workflow tasks, also read:
 
-- `references/teams-api.md`
+- `references/teams.md`
 
 That reference covers:
 
-- the relationship between `team`, `group`, `chat`, `channel`, and
-  `chatMessage`
+- team, channel, and chat routing
 - common Teams management and messaging flows
-- asynchronous team creation behavior
-- Teams polling limitations from the official overview
-- the split between direct/group chats and team channels
+- send-message patterns
+- when to read the deeper `references/teams-api.md` file
 
 ## SharePoint Search Notes
 
