@@ -48,7 +48,7 @@ Optional:
 1. Make sure `MS_GRAPH_ACCESS_TOKEN_FILE` points to the local token file.
 2. Run the doctor command first to confirm the required env var exists without
    printing any secret values.
-3. Read only the domain reference that matches the task.
+3. Start with the one domain reference that best matches the task.
 4. Ensure the token already contains the least-privilege Graph scopes needed
    for the endpoint.
 5. Call Microsoft Graph through the bundled script.
@@ -103,8 +103,7 @@ Do not load all references just because they exist.
 Check configuration:
 
 ```bash
-python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py doctor \
-  # requires MS_GRAPH_ACCESS_TOKEN_FILE to be set
+python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py doctor
 ```
 
 Basic request example:
@@ -124,12 +123,9 @@ python3 custom-prompts/skills/office365-graph-secure/scripts/manage_token_file.p
 
 Create or update the token file from stdin:
 
-```bash
-printf '%s' 'YOUR_TOKEN_HERE' | \
-python3 custom-prompts/skills/office365-graph-secure/scripts/manage_token_file.py \
-  --stdin \
-  --print-export
-```
+Use `--stdin` only for non-interactive tooling that already holds the token
+outside chat and outside shell history. Do not put the token directly in the
+shell command line.
 
 Use `--graph-version beta` only when the user explicitly needs preview APIs.
 Default to `v1.0` for production-safe behavior.
@@ -184,14 +180,3 @@ When proposing a skill fix:
   domain-specific failure patterns.
 - If a failure exposes a missing recipe, misleading instruction, or incomplete
   guidance in this skill, propose a concrete skill improvement to the user.
-
-Read these references when needed:
-
-- `references/api-docs.md`
-- `references/calendar.md`
-- `references/mail.md`
-- `references/security-and-auth.md`
-- `references/sharepoint-pages.md`
-- `references/sharepoint-search.md`
-- `references/teams.md`
-- `references/research-notes.md`
