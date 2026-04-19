@@ -1,4 +1,4 @@
 interface:
   display_name: "Office 365 Graph Secure"
-  short_description: "Call Office 365 through Microsoft Graph without exposing tokens"
-  default_prompt: "Use $office365-graph-secure to access Office 365 through Microsoft Graph while keeping client secrets and OAuth tokens inside environment variables and Python-only execution."
+  short_description: "Call Office 365 through Graph using a local token file"
+  default_prompt: "Use $office365-graph-secure to access Office 365 through Microsoft Graph while keeping the bearer token only in MS_GRAPH_ACCESS_TOKEN_FILE and out of chat."

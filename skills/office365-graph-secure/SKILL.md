@@ -2,9 +2,10 @@
 name: office365-graph-secure
 description: >
   Use Microsoft Graph to communicate with Office 365 and Microsoft 365 through
-  bundled Python scripts that keep OAuth tokens and client secrets out of the
-  model context. Use when an agent must read or write mail, calendar, files,
-  users, Teams, SharePoint, or other Graph resources without exposing tokens.
+  bundled Python scripts that keep access tokens out of the model context by
+  reading them only from a local token file. Use when an agent must read or
+  write mail, calendar, files, users, Teams, SharePoint, or other Graph
+  resources without exposing tokens.
 ---
 
 # Office 365 Graph Secure
@@ -14,96 +15,40 @@ Microsoft Graph.
 
 ## Security Rules
 
-- Never ask the user to paste an access token, refresh token, or client secret
-  into chat.
-- Never print or inspect secret-bearing environment variables such as
-  `MS_GRAPH_CLIENT_SECRET`.
-- Never pass tokens or client secrets on the command line, in JSON payloads, or
-  in files that you later read back into the model.
-- Only use the bundled Python script for authentication and Graph calls. It
-  reads credentials from environment variables, token files, browser-login
-  cache, or device-code flow, and it redacts token-shaped strings from output.
+- Never ask the user to paste an access token into chat.
+- Never pass tokens on the command line, in JSON payloads, or in files that you
+  later read back into the model.
+- Only use the bundled Python script for Graph calls. It reads the access token
+  only from `MS_GRAPH_ACCESS_TOKEN_FILE` and redacts token-shaped strings from
+  output.
 - Never add an `Authorization` header manually. The script injects it internally.
 
-## Supported Auth Modes
+## Authentication
 
-- `client-credentials`
-  Use for daemon or app-only access. Requires Microsoft Graph application
-  permissions and admin consent. This mode uses the OAuth 2.0 client
-  credentials flow with `https://graph.microsoft.com/.default`.
-- `device-code`
-  Use for delegated user access, such as `/me/messages`, `/me/events`,
-  `/me/drive`, or user-context mail send. This mode shows a verification URL
-  and code, then polls until the user finishes sign-in.
-- `browser-login`
-  Use for delegated user access with a browser sign-in and localhost callback.
-  The script opens the Microsoft login page, completes OAuth 2.0 authorization
-  code flow with PKCE, and stores a local token cache with owner-only
-  permissions for later reuse and refresh.
-- `access-token-env`
-  Use when a token is already present in the local shell environment as
-  `MS_GRAPH_ACCESS_TOKEN`. This is suitable for quick local testing when the
-  token was obtained outside the chat and outside the model context.
-- `access-token-file`
-  Use when a token is stored in a local file referenced by
-  `MS_GRAPH_ACCESS_TOKEN_FILE`. The script requires owner-only permissions on
-  that file and accepts either a raw token string or JSON with
+The only supported authentication method is `access-token-file`.
+
+- Store the token in a local file referenced by `MS_GRAPH_ACCESS_TOKEN_FILE`.
+- The script requires owner-only permissions on that file.
+- The file may contain either a raw token string or JSON with
   `{"access_token":"..."}`.
 
 ## Required Environment Variables
-
-For `client-credentials`:
-
-- `MS_GRAPH_TENANT_ID`
-- `MS_GRAPH_CLIENT_ID`
-- `MS_GRAPH_CLIENT_SECRET`
-
-For `device-code`:
-
-- `MS_GRAPH_TENANT_ID`
-- `MS_GRAPH_CLIENT_ID`
-
-For `browser-login`:
-
-- `MS_GRAPH_TENANT_ID`
-- `MS_GRAPH_CLIENT_ID`
-
-For `access-token-env`:
-
-- `MS_GRAPH_ACCESS_TOKEN`
-
-For `access-token-file`:
 
 - `MS_GRAPH_ACCESS_TOKEN_FILE`
 
 Optional:
 
-- `MS_GRAPH_AUTH_MODE`
 - `MS_GRAPH_API_VERSION`
 - `MS_GRAPH_TIMEOUT_SEC`
 - `MS_GRAPH_USER_AGENT`
-- `MS_GRAPH_SCOPES`
-- `MS_GRAPH_REDIRECT_URI`
-- `MS_GRAPH_TOKEN_CACHE_FILE`
-- `MS_GRAPH_BROWSER_TIMEOUT_SEC`
-- `MS_GRAPH_ACCESS_TOKEN`
-- `MS_GRAPH_ACCESS_TOKEN_FILE`
 
 ## Workflow
 
-1. Choose auth mode in this order:
-   - If `MS_GRAPH_ACCESS_TOKEN_FILE` is already configured and the task only
-     needs a current delegated token, use `access-token-file`.
-   - Otherwise, if browser-login is configured in Entra and the task is
-     delegated, use `browser-login`.
-   - Otherwise, if delegated auth is needed and browser-login is not available,
-     use `device-code`.
-   - Use `access-token-env` only for short-lived manual testing.
-   - Use `client-credentials` only for daemon/app-only Graph endpoints that do
-     not require `/me/...`.
-2. Run the doctor command first to confirm the required env vars exist without
+1. Make sure `MS_GRAPH_ACCESS_TOKEN_FILE` points to the local token file.
+2. Run the doctor command first to confirm the required env var exists without
    printing any secret values.
-3. Choose the least-privilege scope before requesting a new token.
+3. Ensure the token already contains the least-privilege Graph scopes needed for
+   the task.
 4. Call Microsoft Graph through the bundled script.
 5. Share only the sanitized response fields back to the user.
 6. If the API returns `@odata.nextLink`, follow it with another `request` call
@@ -114,9 +59,15 @@ Optional:
 Use these delegated scopes as the default starting point:
 
 - `/me` or profile basics: `User.Read`
-- `/me/messages` or inbox queries: `Mail.Read`
+- `/me/messages` or inbox queries: `Mail.ReadBasic`
+- `/me/messages` when message body or richer properties are required: `Mail.Read`
 - `/me/sendMail`: `Mail.Send`
-- `/me/events`: `Calendars.Read`
+- `/me/calendar/calendarView` or upcoming events: `Calendars.ReadBasic`
+- `/me/events` when fuller calendar data is required: `Calendars.Read`
+- `/me/joinedTeams`: `Team.ReadBasic.All`
+- `/teams/{team-id}/primaryChannel` or channel lookups: `Channel.ReadBasic.All`
+- `/sites/root` or `/sites/{hostname}:/{relative-path}`: `Sites.Read.All`
+- `/sites/{siteId}/drives`: `Files.Read` or `Sites.Read.All`
 - `/me/drive` or OneDrive reads: `Files.Read`
 - `/me/memberOf`: `User.Read`
 
@@ -126,14 +77,26 @@ Escalate scopes only when the endpoint or operation requires it.
 
 Use these patterns before improvising:
 
-- Check current user:
+- Mail: check current user:
   `request --path /me`
-- List unread inbox items:
+- Mail: list unread inbox items:
   `request --path '/me/mailFolders/Inbox/messages?$filter=isRead%20eq%20false&$top=10&$select=subject,from,receivedDateTime,isRead,webLink'`
-- Read upcoming events:
-  `request --path '/me/events?$top=10&$select=subject,start,end,location,webLink'`
-- Inspect OneDrive root:
-  `request --path /me/drive/root`
+- Mail: send a message:
+  `request --method POST --path /me/sendMail --body-file /absolute/path/to/send-mail.json`
+- Calendar: read upcoming events in a time window:
+  `request --path '/me/calendar/calendarView?startDateTime=2026-04-19T00:00:00Z&endDateTime=2026-04-26T00:00:00Z&$top=10&$select=subject,start,end,location,webLink' --header 'Prefer=outlook.timezone=\"Europe/Berlin\"'`
+- Calendar: create an event:
+  `request --method POST --path /me/events --body-file /absolute/path/to/create-event.json`
+- Teams: list joined teams:
+  `request --path /me/joinedTeams`
+- Teams: get the General channel for a team:
+  `request --path '/teams/{team-id}/primaryChannel?$select=id,displayName,webUrl'`
+- SharePoint: get the tenant root site:
+  `request --path '/sites/root?$select=id,displayName,webUrl'`
+- SharePoint: get a site by path:
+  `request --path '/sites/{hostname}:/{server-relative-path}?$select=id,displayName,webUrl'`
+- SharePoint: list document libraries for a site:
+  `request --path '/sites/{site-id}/drives?$top=10&$select=id,name,webUrl,driveType'`
 - Follow paging:
   reuse the exact `@odata.nextLink` value as `--path 'https://graph.microsoft.com/...'`
 
@@ -143,61 +106,15 @@ Check configuration:
 
 ```bash
 python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py doctor \
-  --auth-mode client-credentials
+  # requires MS_GRAPH_ACCESS_TOKEN_FILE to be set
 ```
 
-App-only request example:
+Basic request example:
 
 ```bash
 python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py request \
-  --auth-mode client-credentials \
-  --method GET \
-  --path '/users?$top=5'
-```
-
-Delegated request example:
-
-```bash
-python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py request \
-  --auth-mode device-code \
-  --scope User.Read \
-  --scope Mail.Read \
   --method GET \
   --path '/me/messages?$top=10'
-```
-
-Browser login example:
-
-```bash
-python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py login \
-  --scope User.Read
-```
-
-Browser login request example:
-
-```bash
-python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py request \
-  --auth-mode browser-login \
-  --method GET \
-  --path /me
-```
-
-Environment token example:
-
-```bash
-python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py request \
-  --auth-mode access-token-env \
-  --method GET \
-  --path /me
-```
-
-File token example:
-
-```bash
-python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py request \
-  --auth-mode access-token-file \
-  --method GET \
-  --path /me
 ```
 
 Create or update the local token file safely:
@@ -220,30 +137,38 @@ Send mail example:
 
 ```bash
 python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py request \
-  --auth-mode device-code \
-  --scope Mail.Send \
   --method POST \
   --path /me/sendMail \
   --body-file /absolute/path/to/send-mail.json
 ```
 
+Calendar view example:
+
+```bash
+python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py request \
+  --method GET \
+  --header 'Prefer=outlook.timezone="Europe/Berlin"' \
+  --path '/me/calendar/calendarView?startDateTime=2026-04-19T00:00:00Z&endDateTime=2026-04-26T00:00:00Z&$top=10&$select=subject,start,end,location,webLink'
+```
+
+Teams example:
+
+```bash
+python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py request \
+  --method GET \
+  --path /me/joinedTeams
+```
+
+SharePoint example:
+
+```bash
+python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py request \
+  --method GET \
+  --path '/sites/root?$select=id,displayName,webUrl'
+```
+
 Use `--graph-version beta` only when the user explicitly needs preview APIs.
 Default to `v1.0` for production-safe behavior.
-
-## Entra App Registration For Browser Login
-
-For `browser-login`, configure the app registration with:
-
-- `Allow public client flows = Yes`
-- Delegated Microsoft Graph permission such as `User.Read`
-- A mobile/desktop redirect URI matching `MS_GRAPH_REDIRECT_URI`
-
-Default redirect URI used by the script:
-
-- `http://127.0.0.1:8765/callback`
-
-If you change it, update the app registration and `MS_GRAPH_REDIRECT_URI` to the
-same exact value.
 
 ## Request Construction Notes
 
@@ -256,15 +181,18 @@ same exact value.
 - Prefer `$select` to reduce payload size and token exposure risk in returned
   content.
 - Prefer `$top` on list endpoints to keep responses small and manageable.
+- For calendar time-window queries, prefer `/calendarView` over `/events` when
+  you need expanded occurrences within a concrete date range.
+- For SharePoint under delegated auth, prefer `/sites/root` or
+  `/sites/{hostname}:/{relative-path}` over `/sites`, because listing all sites
+  is not generally available for delegated auth.
 - Use `--header KEY=VALUE` for safe extra headers like `Prefer`, but never
   attempt to set `Authorization`.
 - Use `--body-file` or `--body-json` for JSON request bodies.
-- For `access-token-file`, keep the file outside the repo and restrict it to
-  owner-only permissions such as `chmod 600`.
+- Keep the token file outside the repo and restrict it to owner-only
+  permissions such as `chmod 600`.
 - Use `scripts/manage_token_file.py` to create or rotate the token file safely
   without putting the token on the command line.
-- For `browser-login`, the token cache defaults to
-  `~/.config/codex-secrets/ms-graph-auth.json`.
 
 ## Failure Handling
 
@@ -276,8 +204,12 @@ same exact value.
   signed-in user or auth mode.
 - `429`: honor `retry-after` from the response metadata before retrying.
 - `@odata.nextLink`: do not reconstruct it manually; pass it back exactly.
-- For `Mail.Read` failures on `/me/messages`, the token usually has `User.Read`
-  but not mail scopes.
+- For mail failures on `/me/messages`, the token often has `User.Read` but not
+  `Mail.ReadBasic` or `Mail.Read`.
+- For Teams failures on `/me/joinedTeams`, the token often lacks
+  `Team.ReadBasic.All`.
+- For SharePoint failures on `/sites/root` or site-path lookups, the token
+  often lacks `Sites.Read.All`.
 
 Read these references when needed:
 
