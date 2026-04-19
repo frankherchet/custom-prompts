@@ -111,7 +111,7 @@ That reference covers:
 - team, channel, and chat routing
 - common Teams management and messaging flows
 - send-message patterns
-- when to read the deeper `references/teams-api.md` file
+- core Teams resource-model details
 
 ## SharePoint Search Notes
 

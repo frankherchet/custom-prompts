@@ -9,8 +9,10 @@ Primary docs:
   https://learn.microsoft.com/en-us/graph/api/user-list-messages?view=graph-rest-1.0
 - Use `$search` query parameter:
   https://learn.microsoft.com/en-us/graph/search-query-parameter
-- message resource details:
-  `references/message-resource.md`
+- Message resource:
+  https://learn.microsoft.com/en-us/graph/api/resources/message?view=graph-rest-1.0
+- Outlook create/send messages overview:
+  https://learn.microsoft.com/en-us/graph/outlook-create-send-messages
 
 ## Read This For
 
@@ -133,14 +135,88 @@ python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py req
 - When using `/me/messages?$search=...`, prefer compact fields such as
   `subject`, `from`, `receivedDateTime`, `bodyPreview`, and `webLink`.
 
+## Message Composition
+
+Most useful message fields when creating or updating a draft:
+
+- `subject`
+- `body`
+- `toRecipients`
+- `ccRecipients`
+- `bccRecipients`
+- `replyTo`
+- `importance`
+- `from`
+- `sender`
+- `internetMessageHeaders`
+
+Body shape:
+
+```json
+{
+  "contentType": "HTML",
+  "content": "<p>Hello</p>"
+}
+```
+
+Recipient shape:
+
+```json
+{
+  "emailAddress": {
+    "address": "person@example.com",
+    "name": "Person Example"
+  }
+}
+```
+
+Minimal message payload:
+
+```json
+{
+  "subject": "Subject line",
+  "body": {
+    "contentType": "HTML",
+    "content": "<p>Hello from Graph.</p>"
+  },
+  "toRecipients": [
+    {
+      "emailAddress": {
+        "address": "recipient@example.com",
+        "name": "Recipient Example"
+      }
+    }
+  ]
+}
+```
+
+Attachment example under 3 MB:
+
+```json
+{
+  "@odata.type": "#microsoft.graph.fileAttachment",
+  "name": "notes.txt",
+  "contentType": "text/plain",
+  "contentBytes": "SGVsbG8gZnJvbSBHcmFwaC4="
+}
+```
+
 ## Important Behavior
 
 - Microsoft documents that message bodies returned by list operations are HTML
   by default.
 - When using `$filter` and `$orderby` together on messages, Microsoft warns
   about `InefficientFilter` if the sort/filter properties are not aligned.
-- For draft/message payload structure, read `references/message-resource.md`
-  before inventing bodies from scratch.
+- A draft has `isDraft = true`.
+- Drafts are usually stored in the `Drafts` folder.
+- Sent messages are usually stored in `Sent Items`.
+- `body` can be HTML or text.
+- Custom Internet headers can be added only when creating a message and must
+  start with `x-`.
+- The total combined number of `toRecipients`, `ccRecipients`, and
+  `bccRecipients` is limited by Exchange Online sending limits.
+- For files larger than 3 MB, use an upload session instead of posting the
+  attachment directly.
 
 ## Failure Hints
 

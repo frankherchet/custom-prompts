@@ -5,10 +5,26 @@ channel messaging, and chat messaging.
 
 Primary docs:
 
-- Teams API detail:
-  `references/teams-api.md`
 - Teams API overview:
   https://learn.microsoft.com/en-us/graph/api/resources/teams-api-overview?view=graph-rest-1.0
+- Team resource:
+  https://learn.microsoft.com/en-us/graph/api/resources/team?view=graph-rest-1.0
+- Chat resource:
+  https://learn.microsoft.com/en-us/graph/api/resources/chat?view=graph-rest-1.0
+- Channel resource:
+  https://learn.microsoft.com/en-us/graph/api/resources/channel?view=graph-rest-1.0
+- chatMessage resource:
+  https://learn.microsoft.com/en-us/graph/api/resources/chatmessage?view=graph-rest-1.0
+- List chats:
+  https://learn.microsoft.com/en-us/graph/api/chat-list?view=graph-rest-1.0
+- Create chat:
+  https://learn.microsoft.com/en-us/graph/api/chat-post?view=graph-rest-1.0
+- List messages in a chat:
+  https://learn.microsoft.com/en-us/graph/api/chat-list-messages?view=graph-rest-1.0
+- Send chatMessage in a channel or a chat:
+  https://learn.microsoft.com/en-us/graph/api/chatmessage-post?view=graph-rest-1.0
+- Create teams and manage members:
+  https://learn.microsoft.com/en-us/graph/teams-create-group-and-team
 
 ## Read This For
 
@@ -130,11 +146,83 @@ python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py req
 
 ## Important Behavior
 
+- A Microsoft Team is backed by a Microsoft 365 group.
+- The team ID is the same as the backing group ID.
+- Team channel conversations are represented through `channel` and
+  `chatMessage` resources.
+- Direct and group chats are represented through `chat` and `chatMessage`
+  resources.
+- Group conversations in Outlook are different resources and are not the same
+  as Teams channel chat.
+- A `chatMessage` can belong either to a channel or to a chat.
+- `replyToId` applies only to channel-thread messages, not chat messages.
 - Team/channel and chat resources are different parts of the Teams model.
 - Team creation is asynchronous.
+- Creating a one-on-one chat does not create duplicates; Graph returns the
+  existing chat if one already exists between the same two members.
 - Channel messages and chat messages use different resource paths even when the
   payload shape is similar.
-- For deeper resource-model and payload details, read `references/teams-api.md`.
+- Files inside standard channels are backed by SharePoint.
+- Listing chats with `$expand=members` currently returns at most 25 expanded
+  members per chat response.
+- Listing messages in a chat supports `$top`, `$orderby`, and constrained
+  `$filter` on `createdDateTime` or `lastModifiedDateTime`.
+- For chat message reads that include event/system messages, the
+  `Prefer: include-unknown-enum-members` header can be useful.
+- The Teams API overview explicitly warns against aggressive polling. Do not
+  poll Teams resources in a tight loop.
+
+## Minimal Payloads
+
+Create a basic team:
+
+```json
+{
+  "template@odata.bind": "https://graph.microsoft.com/v1.0/teamsTemplates('standard')",
+  "displayName": "Engineering",
+  "description": "Engineering collaboration team"
+}
+```
+
+Create a one-on-one chat:
+
+```json
+{
+  "chatType": "oneOnOne",
+  "members": [
+    {
+      "@odata.type": "#microsoft.graph.aadUserConversationMember",
+      "roles": ["owner"],
+      "user@odata.bind": "https://graph.microsoft.com/v1.0/users('USER_ID_1')"
+    },
+    {
+      "@odata.type": "#microsoft.graph.aadUserConversationMember",
+      "roles": ["owner"],
+      "user@odata.bind": "https://graph.microsoft.com/v1.0/users('USER_ID_2')"
+    }
+  ]
+}
+```
+
+Create a channel:
+
+```json
+{
+  "displayName": "Launch Planning",
+  "description": "Planning and coordination for launch"
+}
+```
+
+Send a simple channel or chat message:
+
+```json
+{
+  "body": {
+    "contentType": "html",
+    "content": "Hello from Microsoft Graph."
+  }
+}
+```
 
 ## Failure Hints
 
