@@ -81,11 +81,17 @@ Use these delegated scopes as the default starting point:
 - `/me/calendar/calendarView` or upcoming events: `Calendars.ReadBasic`
 - `/me/events` when fuller calendar data is required: `Calendars.Read`
 - `/me/joinedTeams`: `Team.ReadBasic.All`
+- `/me/chats` or `/chats/{chat-id}`: `Chat.ReadBasic`
+- `/chats/{chat-id}/messages` reads: `Chat.Read`
+- `/chats` create chat: `Chat.Create`
 - `/teams/{team-id}/primaryChannel` or channel lookups: `Channel.ReadBasic.All`
 - `/teams/{team-id}` team settings reads: `TeamSettings.Read.All`
 - `/teams` create team: `Team.Create`
 - `/teams/{team-id}/channels/{channel-id}/messages` send channel message:
   Teams-specific delegated send permissions such as `ChannelMessage.Send`
+- `/chats/{chat-id}/messages` send chat message:
+  the current Microsoft Learn send-message page also lists
+  `ChannelMessage.Send`
 - `/sites/root` or `/sites/{hostname}:/{relative-path}`: `Sites.Read.All`
 - `/sites/{siteId}/drives`: `Files.Read` or `Sites.Read.All`
 - `/me/drive` or OneDrive reads: `Files.Read`
@@ -117,6 +123,18 @@ Use these patterns before improvising:
   `request --method POST --path /me/events --body-file /absolute/path/to/create-event.json`
 - Teams: list joined teams:
   `request --path /me/joinedTeams`
+- Teams chat: list chats:
+  `request --path '/me/chats?$top=10&$expand=lastMessagePreview'`
+- Teams chat: get chat details:
+  `request --path '/chats/{chat-id}?$select=id,chatType,topic,webUrl,lastUpdatedDateTime'`
+- Teams chat: create a chat:
+  `request --method POST --path /chats --body-file /absolute/path/to/create-chat.json`
+- Teams chat: list messages:
+  `request --path '/chats/{chat-id}/messages?$top=10'`
+- Teams chat: list messages with system-event expansion:
+  `request --path '/chats/{chat-id}/messages?$top=10' --header 'Prefer=include-unknown-enum-members'`
+- Teams chat: send a message:
+  `request --method POST --path '/chats/{chat-id}/messages' --body-file /absolute/path/to/send-chat-message.json`
 - Teams: get team details:
   `request --path '/teams/{team-id}?$select=id,displayName,description,webUrl'`
 - Teams: get the General channel for a team:
@@ -211,6 +229,14 @@ python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py req
   --path /me/joinedTeams
 ```
 
+Teams chat example:
+
+```bash
+python3 custom-prompts/skills/office365-graph-secure/scripts/graph_secure.py request \
+  --method GET \
+  --path '/me/chats?$top=10&$expand=lastMessagePreview'
+```
+
 Teams send-message example:
 
 ```bash
@@ -258,6 +284,9 @@ Default to `v1.0` for production-safe behavior.
   draft/send payloads from scratch.
 - For Teams resource-model and workflow questions, read `references/teams-api.md`
   before inventing team/channel/chat payloads from scratch.
+- Do not confuse Teams direct or group chats with team channels. Use `/chats`
+  for direct/group chat workflows and `/teams/.../channels/...` for channel
+  workflows.
 
 ## Failure Handling
 
@@ -273,8 +302,15 @@ Default to `v1.0` for production-safe behavior.
   `Mail.ReadBasic` or `Mail.Read`.
 - For Teams failures on `/me/joinedTeams`, the token often lacks
   `Team.ReadBasic.All`.
+- For Teams chat failures on `/me/chats` or `/chats/{chat-id}/messages`, the
+  token often lacks `Chat.ReadBasic` or `Chat.Read`.
+- For Teams chat creation failures on `/chats`, the token often lacks
+  `Chat.Create`.
 - For Teams write failures on channel-message or channel-creation endpoints, the
   token often lacks Teams-specific delegated write permissions.
+- For Teams send-message failures on `/chats/{chat-id}/messages`, check the
+  current delegated send permission documented by Microsoft Learn when the
+  token was minted.
 - For SharePoint failures on `/sites/root` or site-path lookups, the token
   often lacks `Sites.Read.All`.
 - If a failure exposes a missing recipe, misleading instruction, or incomplete

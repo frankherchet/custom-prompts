@@ -85,10 +85,12 @@ For Teams resource-model and workflow tasks, also read:
 
 That reference covers:
 
-- the relationship between `team`, `group`, `channel`, and `chatMessage`
+- the relationship between `team`, `group`, `chat`, `channel`, and
+  `chatMessage`
 - common Teams management and messaging flows
 - asynchronous team creation behavior
 - Teams polling limitations from the official overview
+- the split between direct/group chats and team channels
 
 ## Common Failure Patterns
 
