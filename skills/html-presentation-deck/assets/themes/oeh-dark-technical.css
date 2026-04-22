@@ -1,0 +1,28 @@
+:root[data-theme="oeh-dark"] {
+  color-scheme: dark;
+  --font-body: "Space Grotesk", sans-serif;
+  --font-display: "Space Grotesk", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+  --bg: #06090d;
+  --bg-a: rgba(53, 201, 180, 0.11);
+  --bg-b: rgba(17, 71, 161, 0.2);
+  --bg-c: rgba(255, 255, 255, 0.02);
+  --ink: #f4f7fb;
+  --muted: #97a6b8;
+  --line: rgba(151, 166, 184, 0.16);
+  --grid-line: rgba(151, 166, 184, 0.06);
+  --card: rgba(10, 15, 21, 0.82);
+  --card-strong: rgba(13, 19, 27, 0.94);
+  --panel-glow-a: rgba(53, 201, 180, 0.14);
+  --panel-glow-b: rgba(17, 71, 161, 0.18);
+  --accent: #35c9b4;
+  --accent-soft: #3f7fe0;
+  --shadow: 0 28px 90px rgba(0, 0, 0, 0.42);
+  --radius: 20px;
+  --terminal-bg: linear-gradient(180deg, #071116, #0b151d);
+  --terminal-ink: #e7f4f3;
+  --terminal-accent: #72f2df;
+  --terminal-warn: #92a5bf;
+  --switch-bg: rgba(9, 14, 19, 0.88);
+  --switch-border: rgba(151, 166, 184, 0.16);
+}

@@ -1,0 +1,28 @@
+:root[data-theme="premium-light"] {
+  color-scheme: light;
+  --font-body: "Manrope", sans-serif;
+  --font-display: "Manrope", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+  --bg: #eef2f6;
+  --bg-a: rgba(28, 105, 212, 0.12);
+  --bg-b: rgba(143, 168, 195, 0.18);
+  --bg-c: rgba(255, 255, 255, 0.42);
+  --ink: #0d1117;
+  --muted: #4e5b67;
+  --line: rgba(13, 17, 23, 0.1);
+  --grid-line: rgba(13, 17, 23, 0.022);
+  --card: rgba(255, 255, 255, 0.84);
+  --card-strong: rgba(255, 255, 255, 0.94);
+  --panel-glow-a: rgba(28, 105, 212, 0.12);
+  --panel-glow-b: rgba(143, 168, 195, 0.16);
+  --accent: #1c69d4;
+  --accent-soft: #8fa8c3;
+  --shadow: 0 22px 70px rgba(17, 35, 59, 0.08);
+  --radius: 24px;
+  --terminal-bg: linear-gradient(180deg, #10151c, #151b22);
+  --terminal-ink: #edf1f3;
+  --terminal-accent: #85b8ff;
+  --terminal-warn: #d1d9e0;
+  --switch-bg: rgba(255, 255, 255, 0.78);
+  --switch-border: rgba(13, 17, 23, 0.1);
+}

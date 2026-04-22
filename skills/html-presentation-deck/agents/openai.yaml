@@ -1,0 +1,5 @@
+interface:
+  display_name: "HTML Presentation Deck"
+  short_description: "Turn analyses into premium HTML slide decks"
+  default_prompt: "Use $html-presentation-deck to turn this analysis into a structured standalone HTML presentation."
+  brand_color: "#1C69D4"

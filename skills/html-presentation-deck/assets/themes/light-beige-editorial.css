@@ -1,0 +1,28 @@
+:root[data-theme="editorial-beige"] {
+  color-scheme: light;
+  --font-body: "Newsreader", serif;
+  --font-display: "Newsreader", serif;
+  --font-mono: "IBM Plex Mono", monospace;
+  --bg: #ece4d7;
+  --bg-a: rgba(173, 116, 74, 0.11);
+  --bg-b: rgba(129, 109, 84, 0.14);
+  --bg-c: rgba(255, 248, 238, 0.38);
+  --ink: #281d17;
+  --muted: #6d5d52;
+  --line: rgba(40, 29, 23, 0.12);
+  --grid-line: rgba(40, 29, 23, 0.03);
+  --card: rgba(255, 248, 238, 0.84);
+  --card-strong: rgba(255, 250, 243, 0.94);
+  --panel-glow-a: rgba(173, 116, 74, 0.12);
+  --panel-glow-b: rgba(129, 109, 84, 0.14);
+  --accent: #ad744a;
+  --accent-soft: #816d54;
+  --shadow: 0 18px 55px rgba(88, 63, 42, 0.12);
+  --radius: 22px;
+  --terminal-bg: linear-gradient(180deg, #2a241f, #342d27);
+  --terminal-ink: #f5efe7;
+  --terminal-accent: #f1bf93;
+  --terminal-warn: #d8c6b4;
+  --switch-bg: rgba(255, 248, 238, 0.8);
+  --switch-border: rgba(40, 29, 23, 0.1);
+}
